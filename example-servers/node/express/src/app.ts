@@ -34,6 +34,9 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 app.use(express.raw({ limit: '50mb', type: 'application/octet-stream' }));
 
+// Configure static file serving for uploaded files
+app.use('/uploads', express.static('temp/uploads'));
+
 // ------------------ CUSTOM API ------------------
 
 app.post('/chat', async (req: Request, res: Response) => {
