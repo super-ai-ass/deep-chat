@@ -1,10 +1,10 @@
-import express, {Express, NextFunction, Request, Response} from 'express';
-import {HuggingFace} from './services/huggingFace';
-import {StabilityAI} from './services/stabilityAI';
-import {ErrorUtils} from './utils/errorUtils';
-import {Custom} from './services/custom';
-import {OpenAI} from './services/openAI';
-import {Cohere} from './services/cohere';
+import express, { Express, NextFunction, Request, Response } from 'express';
+import { HuggingFace } from './services/huggingFace';
+import { StabilityAI } from './services/stabilityAI';
+import { ErrorUtils } from './utils/errorUtils';
+import { Custom } from './services/custom';
+import { OpenAI } from './services/openAI';
+import { Cohere } from './services/cohere';
 import dotenv from 'dotenv';
 import multer from 'multer';
 import cors from 'cors';
@@ -13,8 +13,15 @@ import cors from 'cors';
 
 dotenv.config();
 
-// this is used for parsing FormData
-const upload = multer();
+// this is used for parsing FormData with size limits
+const upload = multer({
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB per file
+    fieldSize: 50 * 1024 * 1024, // 50MB per field
+    fields: 10, // Max number of non-file fields
+    files: 10 // Max number of files
+  }
+});
 
 const app: Express = express();
 const port = 8080;
@@ -22,7 +29,10 @@ const port = 8080;
 // this will need to be reconfigured before taking the app to production
 app.use(cors());
 
-app.use(express.json());
+// Configure body parsing with increased limits
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(express.raw({ limit: '50mb', type: 'application/octet-stream' }));
 
 // ------------------ CUSTOM API ------------------
 
@@ -101,5 +111,24 @@ app.listen(port, () => {
 });
 
 // ------------------ ERROR HANDLER ------------------
+
+// Handle payload too large errors specifically
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  if (err.type === 'entity.too.large') {
+    res.status(413).json({
+      error: 'Payload too large',
+      message: 'The request payload exceeds the maximum allowed size of 50MB',
+      details: err.message
+    });
+  } else if (err.code === 'LIMIT_FILE_SIZE') {
+    res.status(413).json({
+      error: 'File too large',
+      message: 'The uploaded file exceeds the maximum allowed size of 50MB',
+      details: err.message
+    });
+  } else {
+    next(err);
+  }
+});
 
 app.use(ErrorUtils.handle);
