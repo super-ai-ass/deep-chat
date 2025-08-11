@@ -5,6 +5,9 @@ import { ErrorUtils } from './utils/errorUtils';
 import { Custom } from './services/custom';
 import { OpenAI } from './services/openAI';
 import { Cohere } from './services/cohere';
+import { WebSocketService } from './services/websocket';
+import { WebSocketServer } from 'ws';
+import { createServer } from 'http';
 import dotenv from 'dotenv';
 import multer from 'multer';
 import cors from 'cors';
@@ -107,10 +110,27 @@ app.post('/cohere-summarize', async (req: Request, res: Response, next: NextFunc
   Cohere.summarizeText(req.body, res, next);
 });
 
+// ------------------ WEBSOCKET SERVER ------------------
+
+// Create HTTP server instance
+const server = createServer(app);
+
+// Create WebSocket server on /chat-ws path
+const wss = new WebSocketServer({
+  server,
+  path: '/chat-ws'
+});
+
+// Handle WebSocket connections using the WebSocketService
+wss.on('connection', (ws) => {
+  WebSocketService.handleConnection(ws);
+});
+
 // ------------------ START SERVER ------------------
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
+  console.log(`WebSocket available at ws://localhost:${port}/chat-ws`);
 });
 
 // ------------------ ERROR HANDLER ------------------

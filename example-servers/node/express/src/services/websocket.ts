@@ -1,0 +1,167 @@
+import { WebSocket } from 'ws';
+
+export class WebSocketService {
+  // Store active connections if needed for broadcasting
+  private static connections: Set<WebSocket> = new Set();
+
+  /**
+   * Handle new WebSocket connection
+   */
+  public static handleConnection(ws: WebSocket): void {
+    // Add to active connections
+    this.connections.add(ws);
+    console.log(`Active WebSocket connections: ${this.connections.size}`);
+    // Set up event handlers
+    this.setupEventHandlers(ws);
+  }
+
+  /**
+   * Set up WebSocket event handlers
+   */
+  private static setupEventHandlers(ws: WebSocket): void {
+    // Handle incoming messages
+    ws.on('message', (data: Buffer) => {
+      this.handleMessage(ws, data);
+    });
+
+    // Handle errors
+    ws.on('error', (error) => {
+      console.error('WebSocket error:', error);
+    });
+
+    // Handle connection close
+    ws.on('close', () => {
+      this.connections.delete(ws);
+      console.log('WebSocket connection closed');
+      console.log(`Active WebSocket connections: ${this.connections.size}`);
+    });
+
+    // Handle ping/pong for keeping connection alive
+    ws.on('pong', () => {
+      console.log('Received pong from client');
+    });
+  }
+
+  /**
+   * Handle incoming WebSocket message
+   */
+  private static handleMessage(ws: WebSocket, data: Buffer): void {
+    try {
+      // Parse Deep Chat JSON format message
+      const message = JSON.parse(data.toString());
+      console.log('WebSocket message received:', message);
+
+      // Process message based on type or content
+      if (message.messages) {
+        // Echo back with a response
+        this.sendMessage(ws, {
+          text: `Server received: Message from the server`,
+        });
+      } else if (message.command) {
+        // Handle special commands if needed
+        this.handleCommand(ws, message.command);
+      }
+    } catch (error) {
+      console.error('Error processing WebSocket message:', error);
+      this.sendError(ws, 'Failed to process message');
+    }
+  }
+
+  /**
+   * Handle special commands
+   */
+  private static handleCommand(ws: WebSocket, command: string): void {
+    switch (command) {
+      case 'ping':
+        this.sendMessage(ws, { text: 'pong', type: 'system' });
+        break;
+      case 'status':
+        this.sendMessage(ws, {
+          text: `Server status: OK. Active connections: ${this.connections.size}`,
+          type: 'system'
+        });
+        break;
+      case 'broadcast':
+        this.broadcast({ text: 'Broadcast message to all clients', type: 'broadcast' });
+        break;
+      default:
+        this.sendMessage(ws, { text: `Unknown command: ${command}`, type: 'error' });
+    }
+  }
+
+  /**
+   * Send message to a specific WebSocket client
+   */
+  public static sendMessage(ws: WebSocket, message: any): void {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(JSON.stringify(message));
+    }
+  }
+
+  /**
+   * Send error message to a specific WebSocket client
+   */
+  private static sendError(ws: WebSocket, error: string): void {
+    this.sendMessage(ws, {
+      error: error,
+      type: 'error'
+    });
+  }
+
+  /**
+   * Broadcast message to all connected clients
+   */
+  public static broadcast(message: any): void {
+    const messageStr = JSON.stringify(message);
+    this.connections.forEach((ws) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(messageStr);
+      }
+    });
+  }
+
+  /**
+   * Send streaming response (useful for chat applications)
+   */
+  public static async streamResponse(ws: WebSocket, chunks: string[], delayMs: number = 100): Promise<void> {
+    for (const chunk of chunks) {
+      if (ws.readyState !== WebSocket.OPEN) break;
+
+      this.sendMessage(ws, {
+        text: chunk,
+        type: 'stream',
+        streaming: true
+      });
+
+      await new Promise(resolve => setTimeout(resolve, delayMs));
+    }
+
+    // Send final message to indicate streaming is complete
+    if (ws.readyState === WebSocket.OPEN) {
+      this.sendMessage(ws, {
+        text: '',
+        type: 'stream',
+        streaming: false
+      });
+    }
+  }
+
+  /**
+   * Get all active connections
+   */
+  public static getConnections(): Set<WebSocket> {
+    return this.connections;
+  }
+
+  /**
+   * Close all connections
+   */
+  public static closeAll(): void {
+    this.connections.forEach((ws) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.close();
+      }
+    });
+    this.connections.clear();
+  }
+}
