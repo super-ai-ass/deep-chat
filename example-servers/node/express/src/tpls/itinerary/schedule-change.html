@@ -1,0 +1,31 @@
+<div class="message-container">
+  <div class="message-bubble">
+    <div class="message-text">
+      <strong class="{{alert_color}}">{{alert_icon}} {{alert_title}}</strong><br><br>
+      {{alert_message}}
+    </div>
+  </div>
+
+  <div class="service-card-overflow">
+    <div class="flex justify-between items-center p-4">
+      <div class="service-title-indigo">
+        <iconify-icon icon="{{service_icon}}" class="text-xl"></iconify-icon>
+        {{service_title}}
+      </div>
+      <div class="action-button" data-alert-text="{{action_alert_text}}">
+        {{action_button_text}}
+      </div>
+    </div>
+    <div class="px-4 pb-4">
+      {{#each schedule_items}}
+      <div class="schedule-item">
+        <div class="detail-label">{{label}}：</div>
+        <div class="schedule-content">
+          <iconify-icon icon="{{icon}}" class="{{icon_color}}"></iconify-icon>
+          <span>{{content}}</span>
+        </div>
+      </div>
+      {{/each}}
+    </div>
+  </div>
+</div>

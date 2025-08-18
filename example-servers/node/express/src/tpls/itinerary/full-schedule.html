@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{trip_title}}</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Microsoft YaHei', sans-serif;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      min-height: 100vh;
+      padding: 20px;
+      color: #334155;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      opacity: 0.9;
+      font-size: 14px;
+    }
+
+    .content {
+      padding: 30px;
+    }
+
+    .itinerary-document {
+      font-family: 'Microsoft YaHei', sans-serif;
+    }
+
+    .doc-header {
+      text-align: center;
+      margin-bottom: 30px;
+      padding-bottom: 20px;
+      border-bottom: 2px solid #3b82f6;
+    }
+
+    .doc-title {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-bottom: 10px;
+    }
+
+    .doc-subtitle {
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 15px;
+    }
+
+    .product-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+      background: #f8fafc;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 25px;
+    }
+
+    .info-item {
+      font-size: 14px;
+      color: #475569;
+    }
+
+    .info-label {
+      font-weight: 600;
+      color: #1e293b;
+    }
+
+    .features-section {
+      margin-bottom: 25px;
+    }
+
+    .features-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 15px;
+    }
+
+    .feature-item {
+      background: linear-gradient(135deg, #f0f9ff 0%, #f0f4ff 100%);
+      padding: 15px;
+      border-radius: 10px;
+      border-left: 4px solid #3b82f6;
+    }
+
+    .feature-label {
+      font-weight: 600;
+      color: #1e293b;
+      font-size: 13px;
+      margin-bottom: 5px;
+    }
+
+    .feature-value {
+      color: #3b82f6;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .schedule-section {
+      margin-bottom: 25px;
+    }
+
+    .day-schedule {
+      margin-bottom: 25px;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .day-header {
+      background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%);
+      color: white;
+      padding: 15px 20px;
+      font-weight: 600;
+      font-size: 16px;
+    }
+
+    .day-content {
+      padding: 0;
+    }
+
+    .activity-item {
+      display: grid;
+      grid-template-columns: 80px 1fr 100px 80px;
+      gap: 15px;
+      padding: 20px;
+      border-bottom: 1px solid #f1f5f9;
+      align-items: center;
+      transition: background-color 0.3s ease;
+    }
+
+    .activity-item:hover {
+      background-color: #f8fafc;
+      cursor: pointer;
+    }
+
+    .activity-item:last-child {
+      border-bottom: none;
+    }
+
+    .activity-time {
+      background: rgba(59, 130, 246, 0.1);
+      color: #3b82f6;
+      padding: 8px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 12px;
+    }
+
+    .activity-details h4 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1e293b;
+      margin-bottom: 5px;
+    }
+
+    .activity-description {
+      font-size: 13px;
+      color: #64748b;
+      line-height: 1.4;
+    }
+
+    .activity-price {
+      text-align: center;
+      font-weight: 600;
+      color: #ef4444;
+      font-size: 14px;
+    }
+
+    .activity-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .action-btn {
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 10px;
+      border: none;
+      cursor: pointer;
+      font-weight: 500;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #3b82f6;
+      color: white;
+    }
+
+    .btn-success {
+      background: #10b981;
+      color: white;
+    }
+
+    .action-btn:hover {
+      transform: scale(1.05);
+    }
+
+    .cost-summary {
+      background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+      padding: 20px;
+      border-radius: 12px;
+      margin-top: 25px;
+      border: 1px solid #f59e0b;
+    }
+
+    .cost-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #92400e;
+      margin-bottom: 15px;
+      text-align: center;
+    }
+
+    .cost-breakdown {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .cost-item {
+      text-align: center;
+      font-size: 12px;
+      color: #92400e;
+    }
+
+    .cost-value {
+      font-weight: 600;
+      font-size: 14px;
+      color: #b45309;
+    }
+
+    .total-cost {
+      text-align: center;
+      padding-top: 15px;
+      border-top: 2px solid #f59e0b;
+      font-size: 18px;
+      font-weight: 700;
+      color: #92400e;
+    }
+
+    .footer {
+      background: #f8fafc;
+      padding: 20px;
+      text-align: center;
+      border-top: 1px solid #e2e8f0;
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .qr-code {
+      margin-top: 15px;
+      padding: 10px;
+      background: white;
+      border-radius: 8px;
+      display: inline-block;
+    }
+
+    .print-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 10px 15px;
+      background: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      z-index: 1000;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+      transition: all 0.3s ease;
+    }
+
+    .print-btn:hover {
+      background: #2563eb;
+      transform: translateY(-2px);
+    }
+
+    .app-download {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f0f9ff;
+      border-radius: 10px;
+      text-align: center;
+    }
+
+    .app-download h3 {
+      color: #1e40af;
+      margin-bottom: 10px;
+    }
+
+    .qr-placeholder {
+      width: 100px;
+      height: 100px;
+      background: #f3f4f6;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #6b7280;
+      font-size: 12px;
+      text-align: center;
+      line-height: 1.2;
+      margin: 0 auto;
+    }
+
+    /* 打印样式 */
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .container {
+        box-shadow: none;
+        border-radius: 0;
+      }
+
+      .action-btn,
+      .print-btn {
+        display: none;
+      }
+
+      .app-download {
+        display: none;
+      }
+    }
+
+    /* 移动端适配 */
+    @media (max-width: 768px) {
+      .container {
+        border-radius: 0;
+        margin: -20px;
+      }
+
+      .content {
+        padding: 20px;
+      }
+
+      .product-info {
+        grid-template-columns: 1fr;
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .cost-breakdown {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .activity-item {
+        grid-template-columns: 60px 1fr 80px;
+        gap: 10px;
+      }
+
+      .activity-actions {
+        display: none;
+      }
+
+      .print-btn {
+        top: 10px;
+        right: 10px;
+        padding: 8px 12px;
+        font-size: 11px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <button class="print-btn" onclick="window.print()">🖨️ {{print_button_text}}</button>
+
+  <div class="container">
+    <div class="header">
+      <h1>🧳 {{header_title}}</h1>
+      <p>{{header_subtitle}}</p>
+    </div>
+
+    <div class="content">
+      <div class="itinerary-document">
+        <div class="doc-header">
+          <h1 class="doc-title">{{itinerary_title}}</h1>
+        </div>
+
+        <div class="schedule-section">
+          <h3 class="features-title">📅 {{schedule_section_title}}</h3>
+
+          {{#each days}}
+          <div class="day-schedule">
+            <div class="day-header">{{day_title}}</div>
+            <div class="day-content">
+              {{#each activities}}
+              <div class="activity-item">
+                <div class="activity-time">{{time}}</div>
+                <div class="activity-details">
+                  <h4>{{icon}} {{title}}</h4>
+                  <p class="activity-description">{{description}}</p>
+                </div>
+                <div class="activity-price">{{price}}</div>
+                <div class="activity-actions">
+                  {{#each buttons}}
+                  <button class="action-btn {{class}}">{{text}}</button>
+                  {{/each}}
+                </div>
+              </div>
+              {{/each}}
+            </div>
+          </div>
+          {{/each}}
+        </div>
+
+        {{#if cost_summary}}
+        <div class="cost-summary">
+          <h3 class="cost-title">💰 {{cost_summary.title}}</h3>
+          <div class="cost-breakdown">
+            {{#each cost_summary.breakdown}}
+            <div class="cost-item">
+              <div class="cost-value">{{value}}</div>
+              <div>{{label}}</div>
+            </div>
+            {{/each}}
+          </div>
+          <div class="total-cost">
+            {{cost_summary.total_label}}：{{cost_summary.total_value}}
+          </div>
+        </div>
+        {{/if}}
+      </div>
+
+    </div>
+
+    <div class="footer">
+      <p>{{footer_text}}</p>
+    </div>
+  </div>
+
+  <script>
+  </script>
+</body>
+
+</html>

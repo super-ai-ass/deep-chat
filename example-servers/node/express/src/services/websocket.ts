@@ -1,4 +1,5 @@
 import { WebSocket } from 'ws';
+import { handleTemplateMessageAsHtml, } from './ws.mock';
 
 export class WebSocketService {
   // Store active connections if needed for broadcasting
@@ -53,13 +54,26 @@ export class WebSocketService {
 
       // Process message based on type or content
       if (message.messages) {
-        // Echo back with a response
-        this.sendMessage(ws, {
-          text: `Server received: Message from the server`,
-        });
+        // Send a contextual template response based on current time
+        const msg = message.messages[0];
+        const htmlResponse = handleTemplateMessageAsHtml(msg);
+        if (htmlResponse) {
+          this.sendMessage(ws, htmlResponse);
+          console.log(`📤 推送HTML模板响应`);
+        }
       } else if (message.command) {
         // Handle special commands if needed
         this.handleCommand(ws, message.command);
+      } else {
+        // Use the HTML template message handler from ws.mock.ts
+        const htmlResponse = handleTemplateMessageAsHtml(message);
+        if (htmlResponse) {
+          this.sendMessage(ws, htmlResponse);
+          console.log(`📤 推送HTML模板响应`);
+        } else {
+          // Fallback for unhandled messages
+          console.log('❓ 未处理的消息类型:', message);
+        }
       }
     } catch (error) {
       console.error('Error processing WebSocket message:', error);
