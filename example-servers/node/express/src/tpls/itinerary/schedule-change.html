@@ -1,15 +1,12 @@
-<div class="message-container">
-  <div class="message-bubble">
-    <div class="message-text">
-      <strong class="{{alert_color}}">{{alert_icon}} {{alert_title}}</strong><br><br>
-      {{alert_message}}
-    </div>
-  </div>
+<div>
+  <strong class="{{alert_color}}">{{alert_icon}} {{alert_title}}</strong>
+  <p>
+    {{alert_message}}
+  </p>
 
   <div class="service-card-overflow">
     <div class="flex justify-between items-center p-4">
       <div class="service-title-indigo">
-        <iconify-icon icon="{{service_icon}}" class="text-xl"></iconify-icon>
         {{service_title}}
       </div>
       <div class="action-button" data-alert-text="{{action_alert_text}}">
