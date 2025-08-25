@@ -121,7 +121,7 @@ class Deployer {
   async deleteFile(): Promise<void> {
     const spinner = ora('正在删除文件...').start();
     try {
-      await this.client.rmdir(this.serverConfig.remotePath);
+      await this.client.rmdir(this.serverConfig.remotePath + "/src");
       spinner.succeed('文件删除完成');
     } catch (error) {
       spinner.fail('文件删除失败');
@@ -135,7 +135,11 @@ class Deployer {
 
     try {
       const localPath = path.resolve(this.config.localDistPath);
-      await this.client.uploadDir(localPath, this.serverConfig.remotePath);
+      await this.client.uploadDir(localPath, this.serverConfig.remotePath + "/dist");
+      await this.client.uploadFile('package.json', this.serverConfig.remotePath + '/package.json');
+      await this.client.uploadFile('package-lock.json', this.serverConfig.remotePath + '/package-lock.json');
+      await this.client.uploadFile('ecosystem.config.js', this.serverConfig.remotePath + '/ecosystem.config.js');
+
       spinner.succeed('文件上传完成');
     } catch (error) {
       spinner.fail('文件上传失败');

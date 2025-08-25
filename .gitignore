@@ -4,3 +4,4 @@ bundle
 local_assets
 .vscode
 /example-servers/node/express/temp/uploads
+/example-servers/node/express/logs

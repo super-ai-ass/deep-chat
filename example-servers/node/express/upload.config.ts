@@ -53,9 +53,8 @@ export const uploadConfig: UploadConfig = {
       port: 22,
       username: 'fanhui',
       privateKey: '~/.ssh/id_gateway', // 或使用 password: 'your-password'
-      remotePath: '/var/www/deep-chat-demo-test',
-      backupPath: '/var/backups/deep-chat-demo-test',
-      buildCommand: 'npm run build:testing',
+      remotePath: '/var/mcp-server/tpl-mpc-server',
+      buildCommand: 'npm run build:mcp',
       excludeFiles: ['*.map', 'test-*']
     },
 

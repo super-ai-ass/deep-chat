@@ -3,6 +3,7 @@ import { randomUUID } from "node:crypto";
 import { McpServer, ResourceTemplate } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StreamableHTTPServerTransport } from "@modelcontextprotocol/sdk/server/streamableHttp.js";
 import { isInitializeRequest } from "@modelcontextprotocol/sdk/types.js"
+import dotenv from "dotenv";
 import { z } from "zod";
 import { TemplateService } from "./templateService.js";
 import {
@@ -13,6 +14,8 @@ import {
   scheduleChangeSchema,
   fullScheduleSchema
 } from "./templateSchemas.js";
+
+dotenv.config();
 
 const server = new McpServer({
   name: "tpl-mcp-server",
@@ -71,7 +74,7 @@ server.registerResource(
   },
   async (uri, { templateType }) => {
     try {
-      const templatePath = TemplateService.getTemplatePath(templateType);
+      const templatePath = TemplateService.getTemplatePath(templateType as string);
       const fs = await import('fs');
       const path = await import('path');
       const fullPath = path.join(__dirname, '../tpls', templatePath);
@@ -185,7 +188,7 @@ server.registerResource(
       }
     };
 
-    const example = examples[templateType];
+    const example = examples[templateType as string];
     if (!example) {
       return {
         contents: [{
@@ -242,17 +245,18 @@ server.registerTool(
   async ({ name }, { sendNotification }) => {
 
     const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
-    let notification = {
+
+    await sendNotification({
       method: "notifications/message",
       params: { level: "info", data: `First greet to ${name}` }
-    }
-
-    await sendNotification(notification)
+    } as any)
 
     await sleep(1000)
 
-    notification.params.data = `Second greet to ${name}`
-    await sendNotification(notification);
+    await sendNotification({
+      method: "notifications/message",
+      params: { level: "info", data: `Second greet to ${name}` }
+    } as any);
 
     await sleep(1000)
 
@@ -540,4 +544,7 @@ app.get('/mcp', handleSessionRequest);
 // Handle DELETE requests for session termination
 app.delete('/mcp', handleSessionRequest);
 
-app.listen(3000);
+const port = process.env.PORT || 3001;
+app.listen(port, () => {
+  console.log(`MCP Server listening on port ${port}`);
+});
