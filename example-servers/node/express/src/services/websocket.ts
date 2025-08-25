@@ -38,6 +38,9 @@ export class WebSocketService {
     });
 
     // Handle ping/pong for keeping connection alive
+    ws.on('ping', () => {
+      console.log('Received ping from client');
+    });
     ws.on('pong', () => {
       console.log('Received pong from client');
     });
@@ -52,28 +55,29 @@ export class WebSocketService {
       const message = JSON.parse(data.toString());
       console.log('WebSocket message received:', message);
 
-      // Process message based on type or content
-      if (message.messages) {
-        // Send a contextual template response based on current time
-        const msg = message.messages[0];
-        const htmlResponse = handleTemplateMessageAsHtml(msg);
-        if (htmlResponse) {
-          this.sendMessage(ws, htmlResponse);
-          console.log(`📤 推送HTML模板响应`);
+      if (message.type === 'ping') {
+        this.sendMessage(ws, { type: 'pong', text: new Date().getTime().toString() });
+        return;
+      } else if (message.type === 'chat') {
+        // Process message based on type or content
+        if (message.messages) {
+          // Send a contextual template response based on current time
+          const msg = message.messages[0];
+          const htmlResponse = handleTemplateMessageAsHtml(msg);
+          if (htmlResponse) {
+            this.sendMessage(ws, { type: 'chat', html: htmlResponse.html, role: 'assistant' });
+            console.log(`📤 推送HTML模板响应`);
+            this.sendMessage(ws, { type: 'chat_done' });
+          } else {
+            this.sendMessage(ws, { type: 'chat', text: "Auto response: " + msg.text, role: 'assistant' });
+            this.sendMessage(ws, { type: 'chat_done' });
+          }
         }
-      } else if (message.command) {
-        // Handle special commands if needed
-        this.handleCommand(ws, message.command);
+      } else if (message.type == 'location_changed') {
+        this.sendMessage(ws, { type: 'location_changed', text: "event received", role: 'assistant' });
       } else {
-        // Use the HTML template message handler from ws.mock.ts
-        const htmlResponse = handleTemplateMessageAsHtml(message);
-        if (htmlResponse) {
-          this.sendMessage(ws, htmlResponse);
-          console.log(`📤 推送HTML模板响应`);
-        } else {
-          // Fallback for unhandled messages
-          console.log('❓ 未处理的消息类型:', message);
-        }
+        // Fallback for unhandled messages
+        console.log('❓ 未处理的消息类型:', message);
       }
     } catch (error) {
       console.error('Error processing WebSocket message:', error);
@@ -81,27 +85,6 @@ export class WebSocketService {
     }
   }
 
-  /**
-   * Handle special commands
-   */
-  private static handleCommand(ws: WebSocket, command: string): void {
-    switch (command) {
-      case 'ping':
-        this.sendMessage(ws, { text: 'pong', type: 'system' });
-        break;
-      case 'status':
-        this.sendMessage(ws, {
-          text: `Server status: OK. Active connections: ${this.connections.size}`,
-          type: 'system'
-        });
-        break;
-      case 'broadcast':
-        this.broadcast({ text: 'Broadcast message to all clients', type: 'broadcast' });
-        break;
-      default:
-        this.sendMessage(ws, { text: `Unknown command: ${command}`, type: 'error' });
-    }
-  }
 
   /**
    * Send message to a specific WebSocket client

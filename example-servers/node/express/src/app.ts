@@ -118,7 +118,7 @@ const server = createServer(app);
 // Create WebSocket server on /chat-ws path
 const wss = new WebSocketServer({
   server,
-  path: '/chat-ws'
+  path: '/api/v1/ws/chat'
 });
 
 // Handle WebSocket connections using the WebSocketService
@@ -130,7 +130,6 @@ wss.on('connection', (ws) => {
 
 server.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
-  console.log(`WebSocket available at ws://localhost:${port}/chat-ws`);
 });
 
 // ------------------ ERROR HANDLER ------------------
