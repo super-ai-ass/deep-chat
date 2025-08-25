@@ -4,7 +4,9 @@
   "description": "Example server for the deep-chat component",
   "main": "app.js",
   "scripts": {
-    "start": "npx nodemon"
+    "start": "npx nodemon",
+    "start:mcp": "npx tsx src/mcp-server/index.ts",
+    "test:mcp": "npx mcp-inspector"
   },
   "author": "OvidijusParsiunas",
   "license": "ISC",
@@ -24,8 +26,12 @@
     "@types/multer": "^1.4.11",
     "@types/request": "^2.48.12",
     "@types/ws": "^8.18.1",
+    "chalk": "^5.6.0",
     "cors": "^2.8.5",
+    "fs-extra": "^11.3.1",
+    "node-scp": "^0.0.25",
     "nodemon": "^3.1.0",
+    "ora": "^8.2.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.4.2",
     "zod": "^3.25.76"
