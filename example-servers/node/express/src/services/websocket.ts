@@ -49,7 +49,7 @@ export class WebSocketService {
   /**
    * Handle incoming WebSocket message
    */
-  private static handleMessage(ws: WebSocket, data: Buffer): void {
+  private static async handleMessage(ws: WebSocket, data: Buffer): Promise<void> {
     try {
       // Parse Deep Chat JSON format message
       const message = JSON.parse(data.toString());
@@ -59,6 +59,7 @@ export class WebSocketService {
         this.sendMessage(ws, { type: 'pong', text: new Date().getTime().toString() });
         return;
       } else if (message.type === 'chat') {
+        await new Promise(resolve => setTimeout(resolve, 5000));
         // Process message based on type or content
         if (message.messages) {
           // Send a contextual template response based on current time
@@ -69,8 +70,7 @@ export class WebSocketService {
             console.log(`📤 推送HTML模板响应`);
             this.sendMessage(ws, { type: 'chat_done' });
           } else {
-            this.sendMessage(ws, { type: 'chat', text: "Auto response: " + msg.text, role: 'assistant' });
-            this.sendMessage(ws, { type: 'chat_done' });
+            this.sendMessage(ws, { type: 'error', error: "11111 开小差了~" });
           }
         }
       } else if (message.type == 'location_changed') {
