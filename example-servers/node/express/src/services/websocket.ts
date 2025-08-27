@@ -75,6 +75,8 @@ export class WebSocketService {
         }
       } else if (message.type == 'location_changed') {
         this.sendMessage(ws, { type: 'location_changed', text: "event received", role: 'assistant' });
+      } else if (message.type == 'user_cancel') {
+        this.sendMessage(ws, { type: 'user_canceled', });
       } else {
         // Fallback for unhandled messages
         console.log('❓ 未处理的消息类型:', message);
